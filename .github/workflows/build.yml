@@ -1,0 +1,28 @@
+name: Build PSP EBOOT
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: unzip -q anime_fighter_screenpack.zip
+
+      - name: Build
+        run: docker run --rm -v "$PWD/anime_fighter":/src -w /src pspdev/pspdev:latest make
+
+      - name: Package
+        run: |
+          mkdir -p dist/AnimeFighter
+          cp anime_fighter/EBOOT.PBP dist/AnimeFighter/
+          cp -r anime_fighter/data dist/AnimeFighter/data
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AnimeFighter-PSP
+          path: dist
